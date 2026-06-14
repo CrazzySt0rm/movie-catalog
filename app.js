@@ -1,4 +1,4 @@
-const KP_BASE = 'https://wispy-scene-d3da.jonekarter85.workers.dev/v1.4';
+const KP_BASE = '/kp';
 
 const GENRES = [
   { id: 'боевик',          name: 'Боевик' },
