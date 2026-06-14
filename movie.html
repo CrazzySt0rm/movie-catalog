@@ -46,8 +46,7 @@
   </footer>
 
   <script>
-    const KP_KEY  = 'SPR486A-BZ7M1Z2-P0HB4NY-A9Y96WW';
-    const KP_BASE = 'https://api.kinopoisk.dev/v1.4';
+    const KP_BASE = 'https://wispy-scene-d3da.jonekarter85.workers.dev/v1.4';
 
     // Theme
     const savedTheme = localStorage.getItem('theme') || 'light';
@@ -100,9 +99,7 @@
     async function loadMovie() {
       if (!movieId) { showError(); return; }
       try {
-        const res = await fetch(`${KP_BASE}/movie/${movieId}`, {
-          headers: { 'X-API-KEY': KP_KEY },
-        });
+        const res = await fetch(`${KP_BASE}/movie/${movieId}`);
         if (!res.ok) throw new Error();
         renderMovie(await res.json());
       } catch { showError(); }

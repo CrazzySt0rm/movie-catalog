@@ -1,5 +1,4 @@
-const KP_KEY  = 'SPR486A-BZ7M1Z2-P0HB4NY-A9Y96WW';
-const KP_BASE = 'https://api.kinopoisk.dev/v1.4';
+const KP_BASE = 'https://wispy-scene-d3da.jonekarter85.workers.dev/v1.4';
 
 const GENRES = [
   { id: 'боевик',          name: 'Боевик' },
@@ -136,9 +135,7 @@ function updateSectionTitle() {
 
 // ===== KP API =====
 async function kpFetch(path) {
-  const res = await fetch(`${KP_BASE}${path}`, {
-    headers: { 'X-API-KEY': KP_KEY },
-  });
+  const res = await fetch(`${KP_BASE}${path}`);
   if (!res.ok) throw new Error('Ошибка запроса');
   return res.json();
 }
