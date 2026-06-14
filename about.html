@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>О проекте — CineSearch</title>
+  <meta name="description" content="CineSearch — бесплатный каталог фильмов. Узнайте больше о проекте." />
+  <meta name="robots" content="index, follow" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-CYFRLNQNCZ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-CYFRLNQNCZ');
+  </script>
+  <style>
+    .about-wrap { max-width: 760px; margin: 48px auto 0; }
+    .about-wrap h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; margin-bottom: 16px; }
+    .about-wrap h2 { font-size: 1.2rem; font-weight: 700; margin: 32px 0 10px; color: var(--accent); }
+    .about-wrap p  { color: var(--text-muted); line-height: 1.8; margin-bottom: 12px; }
+    .about-wrap ul { color: var(--text-muted); line-height: 1.8; padding-left: 20px; margin-bottom: 12px; }
+    .about-wrap ul li { margin-bottom: 6px; }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin: 16px 0 32px;
+    }
+    .feature-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      backdrop-filter: blur(10px);
+    }
+    .feature-card .icon { font-size: 2rem; margin-bottom: 10px; }
+    .feature-card h3 { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .feature-card p  { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+    .about-wrap a { color: var(--accent); text-decoration: underline; }
+    .about-wrap a:hover { opacity: 0.8; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <a class="logo" href="index.html">🎬 CineSearch</a>
+      <div class="search-wrap">
+        <input id="searchInput" class="search-input" type="text" placeholder="Найти фильм..." autocomplete="off" />
+        <button id="searchBtn" class="btn-glass">Найти</button>
+      </div>
+      <div class="header-actions">
+        <a href="favorites.html" class="btn-glass btn-icon">♥ Избранное</a>
+        <button id="themeToggle" class="btn-glass btn-icon" title="Сменить тему">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="about-wrap">
+      <h1>О проекте CineSearch</h1>
+      <p>
+        CineSearch — бесплатный онлайн-каталог фильмов, созданный для всех, кто любит кино.
+        Здесь можно быстро найти любой фильм, узнать его рейтинг, описание, режиссёра и актёров,
+        а также сохранить понравившиеся в избранное.
+      </p>
+
+      <h2>Возможности</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="icon">🔍</div>
+          <h3>Поиск</h3>
+          <p>Мгновенный поиск по миллионам фильмов на русском языке.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📽️</div>
+          <h3>Жанры</h3>
+          <p>Фильтрация по жанрам: боевик, комедия, драма, триллер и другие.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">⭐</div>
+          <h3>Рейтинги</h3>
+          <p>Актуальные рейтинги и топ-фильмы всех времён по версии TMDB.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">♥</div>
+          <h3>Избранное</h3>
+          <p>Сохраняй фильмы в список избранных прямо в браузере.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🎬</div>
+          <h3>Новинки</h3>
+          <p>Следи за тем, что сейчас в кинотеатрах и что выйдет скоро.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🌙</div>
+          <h3>Тёмная тема</h3>
+          <p>Комфортный просмотр в любое время суток.</p>
+        </div>
+      </div>
+
+      <h2>Данные</h2>
+      <p>
+        Вся информация о фильмах предоставляется бесплатно через открытый API сервиса
+        <a href="https://www.themoviedb.org" target="_blank" rel="noopener">The Movie Database (TMDB)</a>.
+        CineSearch не является официальным продуктом TMDB.
+      </p>
+
+      <h2>Конфиденциальность</h2>
+      <p>
+        CineSearch не собирает и не хранит никаких персональных данных на сервере.
+        Список избранных фильмов и настройки темы сохраняются исключительно в вашем браузере (localStorage).
+        Подробнее — в <a href="privacy.html">Политике конфиденциальности</a>.
+      </p>
+
+      <h2>Контакт</h2>
+      <p>
+        По вопросам и предложениям пишите на
+        <a href="mailto:jonekarter85@gmail.com">jonekarter85@gmail.com</a>.
+      </p>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Данные предоставлены <a href="https://www.themoviedb.org" target="_blank">TMDB</a></p>
+    <nav class="footer-nav">
+      <a href="about.html">О проекте</a>
+      <a href="privacy.html">Политика конфиденциальности</a>
+    </nav>
+  </footer>
+
+  <script>
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    themeToggle.addEventListener('click', () => {
+      document.documentElement.classList.add('theme-transition');
+      const cur  = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+      setTimeout(() => document.documentElement.classList.remove('theme-transition'), 300);
+    });
+    document.getElementById('searchBtn').addEventListener('click', () => {
+      const q = document.getElementById('searchInput').value.trim();
+      if (q) window.location.href = `index.html?q=${encodeURIComponent(q)}`;
+    });
+    document.getElementById('searchInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('searchBtn').click();
+    });
+  </script>
+</body>
+</html>
