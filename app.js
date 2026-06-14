@@ -1,5 +1,22 @@
-const BASE_URL = '/api';
-const IMG_BASE = '/img/w500';
+const KP_KEY  = 'SPR486A-BZ7M1Z2-P0HB4NY-A9Y96WW';
+const KP_BASE = 'https://api.kinopoisk.dev/v1.4';
+
+const GENRES = [
+  { id: 'боевик',          name: 'Боевик' },
+  { id: 'комедия',         name: 'Комедия' },
+  { id: 'драма',           name: 'Драма' },
+  { id: 'ужасы',           name: 'Ужасы' },
+  { id: 'триллер',         name: 'Триллер' },
+  { id: 'фантастика',      name: 'Фантастика' },
+  { id: 'мелодрама',       name: 'Мелодрама' },
+  { id: 'приключения',     name: 'Приключения' },
+  { id: 'мультфильм',      name: 'Мультфильм' },
+  { id: 'фэнтези',         name: 'Фэнтези' },
+  { id: 'криминал',        name: 'Криминал' },
+  { id: 'семейный',        name: 'Семейный' },
+  { id: 'аниме',           name: 'Аниме' },
+  { id: 'документальный',  name: 'Документальный' },
+];
 
 const searchInput   = document.getElementById('searchInput');
 const searchBtn     = document.getElementById('searchBtn');
@@ -38,19 +55,15 @@ themeToggle.addEventListener('click', () => {
 });
 
 // ===== Genres =====
-async function loadGenres() {
-  try {
-    const res  = await fetch(`${BASE_URL}/genre/movie/list?language=ru-RU`);
-    const data = await res.json();
-    (data.genres || []).forEach(g => {
-      const btn = document.createElement('button');
-      btn.className = 'genre-btn';
-      btn.dataset.genre = g.id;
-      btn.textContent = g.name;
-      btn.addEventListener('click', () => selectGenre(btn, g.id));
-      genreFilters.appendChild(btn);
-    });
-  } catch (e) { console.error('Ошибка загрузки жанров:', e); }
+function loadGenres() {
+  GENRES.forEach(g => {
+    const btn = document.createElement('button');
+    btn.className = 'genre-btn';
+    btn.dataset.genre = g.id;
+    btn.textContent = g.name;
+    btn.addEventListener('click', () => selectGenre(btn, g.id));
+    genreFilters.appendChild(btn);
+  });
 }
 
 function selectGenre(btn, genreId) {
@@ -108,10 +121,10 @@ function doSearch() {
 
 function updateSectionTitle() {
   const titles = {
-    popular:    'Популярное прямо сейчас',
-    top_rated:  'Топ рейтинга всех времён',
-    now_playing:'Сейчас в кино',
-    upcoming:   'Скоро в кино',
+    popular:     'Популярное прямо сейчас',
+    top_rated:   'Топ рейтинга всех времён',
+    now_playing: 'Сейчас в кино',
+    upcoming:    'Скоро в кино',
   };
   const genreLabel = currentGenre
     ? document.querySelector(`.genre-btn[data-genre="${currentGenre}"]`)?.textContent
@@ -121,19 +134,45 @@ function updateSectionTitle() {
     : (titles[currentSection] || 'Фильмы');
 }
 
-// ===== Fetch =====
-async function fetchMovies(query, page = 1) {
-  let endpoint;
-  if (query) {
-    endpoint = `${BASE_URL}/search/movie?query=${encodeURIComponent(query)}&page=${page}&language=ru-RU`;
-  } else if (currentGenre) {
-    endpoint = `${BASE_URL}/discover/movie?with_genres=${currentGenre}&sort_by=popularity.desc&page=${page}&language=ru-RU`;
-  } else {
-    endpoint = `${BASE_URL}/movie/${currentSection}?page=${page}&language=ru-RU`;
-  }
-  const res = await fetch(endpoint);
+// ===== KP API =====
+async function kpFetch(path) {
+  const res = await fetch(`${KP_BASE}${path}`, {
+    headers: { 'X-API-KEY': KP_KEY },
+  });
   if (!res.ok) throw new Error('Ошибка запроса');
   return res.json();
+}
+
+async function fetchMovies(query, page = 1) {
+  const limit = 20;
+  const year  = new Date().getFullYear();
+
+  if (query) {
+    return kpFetch(`/movie/search?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`);
+  }
+
+  let params = `page=${page}&limit=${limit}&type=movie`;
+
+  if (currentGenre) {
+    params += `&genres.name=${encodeURIComponent(currentGenre)}&sortField=votes.kp&sortType=-1`;
+  } else {
+    switch (currentSection) {
+      case 'popular':
+        params += `&sortField=votes.kp&sortType=-1`;
+        break;
+      case 'top_rated':
+        params += `&rating.kp=7.5-10&votes.kp=10000-9999999&sortField=rating.kp&sortType=-1`;
+        break;
+      case 'now_playing':
+        params += `&year=${year - 1}-${year}&sortField=votes.kp&sortType=-1`;
+        break;
+      case 'upcoming':
+        params += `&year=${year}-${year + 1}&sortField=year&sortType=-1`;
+        break;
+    }
+  }
+
+  return kpFetch(`/movie?${params}`);
 }
 
 // ===== Render card =====
@@ -143,16 +182,17 @@ function renderCard(movie, delay = 0) {
   card.href      = `movie.html?id=${movie.id}`;
   card.style.animationDelay = `${delay * 0.05}s`;
 
-  const year   = movie.release_date ? movie.release_date.slice(0, 4) : '—';
-  const rating = movie.vote_average ? Number(movie.vote_average).toFixed(1) : '—';
-  const poster = movie.poster_path
-    ? `<img class="movie-poster" src="${IMG_BASE}${movie.poster_path}" alt="${movie.title}" loading="lazy" />`
+  const title  = movie.name || movie.alternativeName || 'Без названия';
+  const year   = movie.year || '—';
+  const rating = movie.rating?.kp ? Number(movie.rating.kp).toFixed(1) : '—';
+  const poster = movie.poster?.previewUrl
+    ? `<img class="movie-poster" src="${movie.poster.previewUrl}" alt="${title}" loading="lazy" />`
     : `<div class="movie-poster-placeholder">🎬</div>`;
 
   card.innerHTML = `
     ${poster}
     <div class="movie-info">
-      <div class="movie-title">${movie.title}</div>
+      <div class="movie-title">${title}</div>
       <div class="movie-year">${year}</div>
       <div class="movie-rating">⭐ ${rating}</div>
     </div>`;
@@ -168,11 +208,11 @@ async function loadMovies() {
 
   try {
     const data = await fetchMovies(currentQuery, currentPage);
-    totalPages = Math.min(data.total_pages || 1, 500);
-    if (!data.results || data.results.length === 0) {
+    totalPages = Math.min(data.pages || 1, 500);
+    if (!data.docs || data.docs.length === 0) {
       noResults.classList.remove('hidden');
     } else {
-      data.results.forEach((movie, i) => moviesGrid.appendChild(renderCard(movie, i)));
+      data.docs.forEach((movie, i) => moviesGrid.appendChild(renderCard(movie, i)));
       updatePagination(currentPage, totalPages);
     }
   } catch {
