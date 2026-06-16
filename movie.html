@@ -25,7 +25,7 @@
         <button id="searchBtn" class="btn-glass">Найти</button>
       </div>
       <div class="header-actions">
-        <a href="favorites.html" class="btn-glass btn-icon">♥ Избранное</a>
+        <a href="favorites.html" class="btn-glass btn-icon">♥ <span>Избранное</span></a>
         <button id="themeToggle" class="btn-glass btn-icon" title="Сменить тему">🌙</button>
       </div>
     </div>
@@ -46,7 +46,7 @@
   </footer>
 
   <script>
-    const KP_BASE = 'https://wispy-scene-d3da.jonekarter85.workers.dev/v1.4';
+    const KP_BASE = '/kp';
 
     // Theme
     const savedTheme = localStorage.getItem('theme') || 'light';
