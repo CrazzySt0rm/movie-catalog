@@ -349,6 +349,13 @@ body {
 .back-link:hover { gap: 10px; }
 .genres-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 
+/* ===== Watch Providers ===== */
+.watch-free { margin-top: 20px; }
+.watch-free-label { font-size: .9rem; color: var(--text-muted); margin-bottom: 10px; }
+.providers-list { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.provider-logo { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; transition: transform var(--transition); }
+.provider-logo:hover { transform: scale(1.1); }
+
 /* ===== Fav button ===== */
 .fav-btn {
   margin-top: 20px;

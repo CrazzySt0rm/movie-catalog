@@ -146,6 +146,7 @@
             ${director ? `<p style="margin-top:16px;font-size:.9rem;color:var(--text-muted)">🎬 Режиссёр: <strong style="color:var(--text)">${director.name}</strong></p>` : ''}
             ${cast ? `<p style="margin-top:8px;font-size:.9rem;color:var(--text-muted)">🎭 В ролях: ${cast}</p>` : ''}
             ${m.description ? `<p class="detail-overview">${m.description}</p>` : ''}
+            <div id="watchProviders"></div>
             <button class="fav-btn ${favActive}" id="favBtn">${favLabel}</button>
           </div>
         </div>`;
@@ -162,6 +163,31 @@
         this.textContent = isFav(m.id) ? '♥ В избранном' : '♡ В избранное';
         this.classList.toggle('active', isFav(m.id));
       });
+
+      loadWatchProviders(m.externalId?.tmdb);
+    }
+
+    async function loadWatchProviders(tmdbId) {
+      if (!tmdbId) return;
+      try {
+        const res = await fetch(`/api/movie/${tmdbId}/watch/providers?language=ru-RU&region=RU`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const free = data.results?.RU?.free;
+        const link = data.results?.RU?.link;
+        if (!free?.length) return;
+
+        const logos = free.map(p =>
+          `<a href="${link}" target="_blank" rel="noopener" title="${p.provider_name}">
+            <img src="/img/t/p/w45${p.logo_path}" alt="${p.provider_name}" class="provider-logo" />
+          </a>`
+        ).join('');
+
+        const el = document.getElementById('watchProviders');
+        if (!el) return;
+        el.innerHTML = `<p class="watch-free-label">▶ Смотреть бесплатно:</p><div class="providers-list">${logos}</div>`;
+        el.classList.add('watch-free');
+      } catch {}
     }
 
     function showError() {
