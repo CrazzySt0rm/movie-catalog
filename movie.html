@@ -173,8 +173,9 @@
         const res = await fetch(`/api/movie/${tmdbId}/watch/providers?language=ru-RU&region=RU`);
         if (!res.ok) return;
         const data = await res.json();
-        const free = data.results?.RU?.free;
-        const link = data.results?.RU?.link;
+        const ru = data.results?.RU;
+        const free = [...(ru?.free || []), ...(ru?.ads || [])];
+        const link = ru?.link;
         if (!free?.length) return;
 
         const logos = free.map(p =>
