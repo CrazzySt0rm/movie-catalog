@@ -6,14 +6,6 @@
   <title>CineSearch — Фильм</title>
   <meta name="description" content="Подробная информация о фильме: описание, рейтинг, актёры, режиссёр." />
   <link rel="stylesheet" href="style.css" />
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-CYFRLNQNCZ"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-CYFRLNQNCZ');
-  </script>
 </head>
 <body>
 
@@ -38,7 +30,7 @@
   </main>
 
   <footer class="footer">
-    <p>Данные предоставлены <a href="https://kinopoisk.dev" target="_blank">Кинопоиск API</a></p>
+    <p>Данные предоставлены <a href="https://www.themoviedb.org" target="_blank">TMDB</a></p>
     <nav class="footer-nav">
       <a href="about.html">О проекте</a>
       <a href="privacy.html">Политика конфиденциальности</a>
@@ -46,7 +38,8 @@
   </footer>
 
   <script>
-    const KP_BASE = '/kp';
+    const API_BASE = '/api';
+    const IMG_BASE = '/img';
 
     // Theme
     const savedTheme = localStorage.getItem('theme') || 'light';
@@ -83,10 +76,10 @@
       } else {
         favs.push({
           id:        m.id,
-          name:      m.name || m.alternativeName,
-          posterUrl: m.poster?.previewUrl || null,
-          year:      m.year,
-          rating:    m.rating?.kp,
+          name:      m.title || m.original_title,
+          posterUrl: m.poster_path ? `${IMG_BASE}/w300${m.poster_path}` : null,
+          year:      m.release_date ? m.release_date.split('-')[0] : '—',
+          rating:    m.vote_average,
         });
       }
       saveFavorites(favs);
@@ -99,7 +92,7 @@
     async function loadMovie() {
       if (!movieId) { showError(); return; }
       try {
-        const res = await fetch(`${KP_BASE}/movie/${movieId}`);
+        const res = await fetch(`${API_BASE}/movie/${movieId}?language=ru-RU&append_to_response=credits`);
         if (!res.ok) throw new Error();
         renderMovie(await res.json());
       } catch { showError(); }
@@ -109,20 +102,20 @@
       document.getElementById('loader').classList.add('hidden');
       const content = document.getElementById('content');
 
-      const title    = m.name || m.alternativeName || 'Без названия';
-      const year     = m.year || '—';
-      const rating   = m.rating?.kp ? Number(m.rating.kp).toFixed(1) : '—';
-      const runtime  = m.movieLength ? `${m.movieLength} мин` : '—';
+      const title    = m.title || m.original_title || 'Без названия';
+      const year     = m.release_date ? m.release_date.split('-')[0] : '—';
+      const rating   = m.vote_average ? Number(m.vote_average).toFixed(1) : '—';
+      const runtime  = m.runtime ? `${m.runtime} мин` : '—';
       const genres   = (m.genres || []).map(g => `<span class="meta-tag">${g.name}</span>`).join('');
-      const director = (m.persons || []).find(p => p.enProfession === 'director');
-      const cast     = (m.persons || []).filter(p => p.enProfession === 'actor').slice(0, 6).map(a => a.name).join(', ');
+      const director = (m.credits?.crew || []).find(c => c.job === 'Director');
+      const cast     = (m.credits?.cast || []).slice(0, 6).map(a => a.name).join(', ');
 
-      const bannerHTML = m.backdrop?.url
-        ? `<img class="movie-banner" src="${m.backdrop.url}" alt="${title}" />`
+      const bannerHTML = m.backdrop_path
+        ? `<img class="movie-banner" src="${IMG_BASE}/original${m.backdrop_path}" alt="${title}" />`
         : '';
 
-      const posterHTML = m.poster?.url
-        ? `<img class="detail-poster" src="${m.poster.url}" alt="${title}" />`
+      const posterHTML = m.poster_path
+        ? `<img class="detail-poster" src="${IMG_BASE}/w500${m.poster_path}" alt="${title}" />`
         : `<div class="detail-poster-placeholder">🎬</div>`;
 
       const favActive = isFav(m.id) ? 'active' : '';
@@ -135,17 +128,16 @@
           ${posterHTML}
           <div class="detail-info">
             <h1>${title}</h1>
-            ${m.alternativeName && m.alternativeName !== m.name ? `<div style="color:var(--text-muted);margin-top:4px;font-size:.9rem">${m.alternativeName}</div>` : ''}
+            ${m.original_title && m.original_title !== m.title ? `<div style="color:var(--text-muted);margin-top:4px;font-size:.9rem">${m.original_title}</div>` : ''}
             <div class="detail-meta">
               <span class="meta-tag accent">⭐ ${rating}</span>
               <span class="meta-tag">${year}</span>
               <span class="meta-tag">⏱ ${runtime}</span>
-              ${m.status ? `<span class="meta-tag">${m.status}</span>` : ''}
             </div>
             <div class="genres-list">${genres}</div>
             ${director ? `<p style="margin-top:16px;font-size:.9rem;color:var(--text-muted)">🎬 Режиссёр: <strong style="color:var(--text)">${director.name}</strong></p>` : ''}
             ${cast ? `<p style="margin-top:8px;font-size:.9rem;color:var(--text-muted)">🎭 В ролях: ${cast}</p>` : ''}
-            ${m.description ? `<p class="detail-overview">${m.description}</p>` : ''}
+            ${m.overview ? `<p class="detail-overview">${m.overview}</p>` : ''}
             <div id="watchProviders"></div>
             <button class="fav-btn ${favActive}" id="favBtn">${favLabel}</button>
           </div>
@@ -164,23 +156,23 @@
         this.classList.toggle('active', isFav(m.id));
       });
 
-      loadWatchProviders(m.externalId?.tmdb);
+      loadWatchProviders(m.id);
     }
 
     async function loadWatchProviders(tmdbId) {
       if (!tmdbId) return;
       try {
-        const res = await fetch(`/api/movie/${tmdbId}/watch/providers?language=ru-RU&region=RU`);
+        const res = await fetch(`${API_BASE}/movie/${tmdbId}/watch/providers?language=ru-RU&region=RU`);
         if (!res.ok) return;
         const data = await res.json();
-        const ru = data.results?.RU;
+        const ru   = data.results?.RU;
         const free = [...(ru?.free || []), ...(ru?.ads || [])];
         const link = ru?.link;
-        if (!free?.length) return;
+        if (!free.length) return;
 
         const logos = free.map(p =>
           `<a href="${link}" target="_blank" rel="noopener" title="${p.provider_name}">
-            <img src="/img/t/p/w45${p.logo_path}" alt="${p.provider_name}" class="provider-logo" />
+            <img src="${IMG_BASE}/w45${p.logo_path}" alt="${p.provider_name}" class="provider-logo" />
           </a>`
         ).join('');
 
