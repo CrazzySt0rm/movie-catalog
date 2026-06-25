@@ -106,7 +106,7 @@
       const year     = m.release_date ? m.release_date.split('-')[0] : '—';
       const rating   = m.vote_average ? Number(m.vote_average).toFixed(1) : '—';
       const runtime  = m.runtime ? `${m.runtime} мин` : '—';
-      const genres   = (m.genres || []).map(g => `<span class="meta-tag">${g.name}</span>`).join('');
+      const genres   = (m.genres || []).map(g => `<a class="meta-tag meta-tag-link" href="index.html?genre=${g.id}">${g.name}</a>`).join('');
       const director = (m.credits?.crew || []).find(c => c.job === 'Director');
       const cast     = (m.credits?.cast || []).slice(0, 6).map(a => a.name).join(', ');
 
@@ -131,7 +131,7 @@
             ${m.original_title && m.original_title !== m.title ? `<div style="color:var(--text-muted);margin-top:4px;font-size:.9rem">${m.original_title}</div>` : ''}
             <div class="detail-meta">
               <span class="meta-tag accent">⭐ ${rating}</span>
-              <span class="meta-tag">${year}</span>
+              <a class="meta-tag meta-tag-link" href="index.html?year=${year}">${year}</a>
               <span class="meta-tag">⏱ ${runtime}</span>
             </div>
             <div class="genres-list">${genres}</div>
@@ -161,17 +161,21 @@
 
     async function loadWatchProviders(tmdbId) {
       if (!tmdbId) return;
+      const PROVIDERS = {
+        'ivi':        'https://www.ivi.ru',
+        'Кинопоиск':  'https://hd.kinopoisk.ru',
+        'Kinopoisk':  'https://hd.kinopoisk.ru',
+      };
       try {
         const res = await fetch(`${API_BASE}/movie/${tmdbId}/watch/providers?language=ru-RU&region=RU`);
         if (!res.ok) return;
         const data = await res.json();
         const ru   = data.results?.RU;
-        const free = [...(ru?.free || []), ...(ru?.ads || [])];
-        const link = ru?.link;
+        const free = [...(ru?.free || []), ...(ru?.ads || [])].filter(p => PROVIDERS[p.provider_name]);
         if (!free.length) return;
 
         const logos = free.map(p =>
-          `<a href="${link}" target="_blank" rel="noopener" title="${p.provider_name}">
+          `<a href="${PROVIDERS[p.provider_name]}" target="_blank" rel="noopener" title="${p.provider_name}">
             <img src="${IMG_BASE}/w45${p.logo_path}" alt="${p.provider_name}" class="provider-logo" />
           </a>`
         ).join('');

@@ -1,5 +1,6 @@
 /* ===== Base & Reset ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+a, button, input { -webkit-tap-highlight-color: transparent; outline: none; }
 
 :root {
   --cream:        #fdf6ec;
@@ -335,6 +336,8 @@ body {
   backdrop-filter: blur(8px);
 }
 .meta-tag.accent { color: var(--accent); }
+.meta-tag-link { text-decoration: none; color: inherit; cursor: pointer; transition: all var(--transition); }
+.meta-tag-link:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 .detail-overview { font-size: 1rem; line-height: 1.7; color: var(--text-muted); margin-top: 20px; }
 .back-link {
   display: inline-flex;
@@ -439,6 +442,6 @@ body {
   .movies-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
   .detail-wrap { flex-direction: column; }
   .detail-poster, .detail-poster-placeholder { width: 100%; max-width: 260px; }
-  .movie-banner { height: 200px; }
+  .movie-banner { display: none; }
   .header-actions .btn-glass span { display: none; }
 }

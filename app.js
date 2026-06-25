@@ -21,6 +21,7 @@ let currentPage    = 1;
 let totalPages     = 1;
 let currentSection = 'popular';
 let currentGenreId = '';
+let currentYear    = '';
 
 // ===== Theme =====
 const savedTheme = localStorage.getItem('theme') || 'light';
@@ -74,6 +75,7 @@ tabs.forEach(tab => {
     currentPage    = 1;
     currentQuery   = '';
     currentGenreId = '';
+    currentYear    = '';
     searchInput.value = '';
     document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
     document.querySelector('.genre-btn[data-genre=""]').classList.add('active');
@@ -92,6 +94,7 @@ function doSearch() {
   currentQuery   = q;
   currentPage    = 1;
   currentGenreId = '';
+  currentYear    = '';
   document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
   document.querySelector('.genre-btn[data-genre=""]').classList.add('active');
   if (q) {
@@ -107,6 +110,10 @@ function doSearch() {
 }
 
 function updateSectionTitle() {
+  if (currentYear) {
+    sectionTitle.textContent = `Фильмы ${currentYear} года`;
+    return;
+  }
   const titles = {
     popular:     'Популярное прямо сейчас',
     top_rated:   'Топ рейтинга всех времён',
@@ -127,6 +134,12 @@ async function fetchMovies(query, page = 1) {
 
   if (query) {
     const res = await fetch(`${API_BASE}/search/movie?query=${encodeURIComponent(query)}&${lang}&page=${page}`);
+    if (!res.ok) throw new Error();
+    return res.json();
+  }
+
+  if (currentYear) {
+    const res = await fetch(`${API_BASE}/discover/movie?primary_release_year=${currentYear}&${lang}&sort_by=popularity.desc&page=${page}`);
     if (!res.ok) throw new Error();
     return res.json();
   }
@@ -217,12 +230,33 @@ nextBtn.addEventListener('click', () => {
   if (currentPage < totalPages) { currentPage++; loadMovies(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 });
 
-// ===== Handle ?q= from other pages =====
+// ===== Handle URL params =====
 const urlParams = new URLSearchParams(window.location.search);
 const urlQuery  = urlParams.get('q');
+const urlGenre  = urlParams.get('genre');
+const urlYear   = urlParams.get('year');
+
 if (urlQuery) {
   searchInput.value = urlQuery;
   doSearch();
+} else if (urlYear) {
+  currentYear = urlYear;
+  heroSection?.classList.add('hidden');
+  document.getElementById('tabsSection').classList.add('hidden');
+  loadGenres();
+  updateSectionTitle();
+  loadMovies();
+} else if (urlGenre) {
+  currentGenreId = urlGenre;
+  loadGenres().then(() => {
+    const btn = document.querySelector(`.genre-btn[data-genre="${urlGenre}"]`);
+    if (btn) {
+      document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    updateSectionTitle();
+  });
+  loadMovies();
 } else {
   loadGenres();
   loadMovies();
